@@ -1,17 +1,21 @@
 import { useEffect, useReducer } from 'react';
-import { API } from 'aws-amplify';
+import { API, graphqlOperation } from 'aws-amplify';
 import { List, Input, Button } from 'antd';
 import { v4 as uuid } from 'uuid';
 
 import 'antd/dist/antd.css';
 import { listNotes } from './graphql/queries';
-import { createNote as CreateNote } from './graphql/mutations';
+import {
+  createNote as CreateNote,
+  deleteNote as DeleteNote,
+} from './graphql/mutations';
 import './App.css';
 
 const styles = {
   container: { padding: 20 },
   input: { marginBottom: 10 },
   item: { textAlign: 'left' },
+  p: { color: '#1890ff' },
 };
 
 const initialState = {
@@ -62,7 +66,7 @@ function App() {
       return alert('please enter a name and description');
     }
 
-    const note = { ...form, cliendId: CLIENT_ID, completed: false, id: uuid() };
+    const note = { ...form, clientId: CLIENT_ID, completed: false, id: uuid() };
     dispatch({ type: 'ADD_NOTE', note });
     dispatch({ type: 'RESET_FORM' });
 
@@ -77,6 +81,21 @@ function App() {
     }
   }
 
+  async function deleteNote({ id }) {
+    const index = state.notes.findIndex((n) => n.id === id);
+    const notes = [
+      ...state.notes.slice(0, index),
+      ...state.notes.slice(index + 1),
+    ];
+    dispatch({ type: 'SET_NOTES', notes });
+    try {
+      await API.graphql(graphqlOperation(DeleteNote, { input: { id } }));
+      console.log('successfully deleted note!');
+    } catch (err) {
+      console.log({ err });
+    }
+  }
+
   function onChange(e) {
     dispatch({ type: 'SET_INPUT', name: e.target.name, value: e.target.value });
   }
@@ -87,7 +106,14 @@ function App() {
 
   function renderItem(item) {
     return (
-      <List.Item style={styles.item}>
+      <List.Item
+        style={styles.item}
+        actions={[
+          <p style={styles.p} onClick={() => deleteNote(item)}>
+            Delete
+          </p>,
+        ]}
+      >
         <List.Item.Meta title={item.name} description={item.description} />
       </List.Item>
     );
