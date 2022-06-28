@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "serviceConfiguration": {
+    "apiName": "notesapi",
+    "serviceName": "AppSync",
+    "gqlSchemaPath": "/Users/ginteu/repo/fullstack/notesapp/amplify/backend/api/notesapi/schema.graphql",
+    "defaultAuthType": {
+      "mode": "API_KEY",
+      "expirationTime": 365,
+      "apiKeyExpirationDate": "2023-06-28T08:03:57.783Z",
+      "keyDescription": "public"
+    }
+  }
+}
